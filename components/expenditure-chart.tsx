@@ -1,7 +1,8 @@
 import { Circle, Text as SkiaText, useFont } from "@shopify/react-native-skia";
-import React from "react";
-import { Dimensions, View } from "react-native";
-import { SharedValue } from "react-native-reanimated";
+import React, { useState } from "react";
+import { Dimensions, Text, View } from "react-native";
+import { SharedValue, useAnimatedReaction } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { CartesianChart, Line, useChartPressState } from "victory-native";
 import Inter from '../assets/fonts/Inter.ttf';
 
@@ -34,8 +35,8 @@ function ToolTip({ x, y, category }: { x: SharedValue<number>; y: SharedValue<nu
   return (
     <>
       <Circle cx={x} cy={y} r={8} color={category.color} />
-      <SkiaText x={x} y={y} text={category.name} font={font} color="black" />
-      <SkiaText x={x} y={y} text={`$${y.get().toFixed(2)}`} font={font} color="black" />
+      <SkiaText x={x} y={y} text={category.name.charAt(0).toUpperCase() + category.name.slice(1)} font={font} color="black" />
+      {/* <SkiaText x={x} y={y} text={`$${y.get().toFixed(2)}`} font={font} color="black" /> */}
     </>
   );
 }
@@ -43,6 +44,20 @@ function ToolTip({ x, y, category }: { x: SharedValue<number>; y: SharedValue<nu
 export function ExpenditureChart() {
   const { state, isActive } = useChartPressState({ x: 0, y: { rent: 0, transport: 0, food: 0, entertainment: 0 } });
   const font = useFont(Inter, 10);
+  const [total, setTotal] = useState(0);
+
+  useAnimatedReaction(
+    () =>
+      state.y.rent.value.value +
+      state.y.transport.value.value +
+      state.y.food.value.value +
+      state.y.entertainment.value.value,
+    (currentTotal, previousTotal) => {
+      if (currentTotal !== previousTotal) {
+        scheduleOnRN(setTotal, currentTotal);
+      }
+    }
+  );
 
   return (
     <View style={{ height: 300, width: screenWidth - 50 }} >
@@ -77,6 +92,7 @@ export function ExpenditureChart() {
           </>
         )}
       </CartesianChart>
+      {isActive ? <Text>Monthly Expenditure: ${total.toFixed(2)}</Text> : <Text>Tap on the chart to see details</Text>}
     </View >
   );
 }
