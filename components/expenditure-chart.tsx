@@ -1,6 +1,9 @@
+import { Circle, Text as SkiaText, useFont } from "@shopify/react-native-skia";
 import React from "react";
 import { Dimensions, View } from "react-native";
-import { VictoryAxis, VictoryChart, VictoryLine, VictoryTheme, VictoryVoronoiContainer } from "victory-native";
+import { SharedValue } from "react-native-reanimated";
+import { CartesianChart, Line, useChartPressState } from "victory-native";
+import Inter from '../assets/fonts/Inter.ttf';
 
 const DATA = Array.from({ length: 12 }, (_, i) => ({
   month: i,
@@ -14,109 +17,66 @@ function getMonthName(monthIndex: number) {
   return MONTH_NAMES[monthIndex % 12];
 }
 const screenWidth = Dimensions.get("window").width;
+const lines = [
+  { key: "rent", color: "red" },
+  { key: "transport", color: "blue" },
+  { key: "food", color: "green" },
+  { key: "entertainment", color: "orange" },
+];
+interface Category {
+  name: string;
+  color: string;
+}
+
+function ToolTip({ x, y, category }: { x: SharedValue<number>; y: SharedValue<number>; category: Category }) {
+  const font = useFont(Inter, 10);
+
+  return (
+    <>
+      <Circle cx={x} cy={y} r={8} color={category.color} />
+      <SkiaText x={x} y={y} text={category.name} font={font} color="black" />
+      <SkiaText x={x} y={y} text={`$${y.get().toFixed(2)}`} font={font} color="black" />
+    </>
+  );
+}
 
 export function ExpenditureChart() {
+  const { state, isActive } = useChartPressState({ x: 0, y: { rent: 0, transport: 0, food: 0, entertainment: 0 } });
+  const font = useFont(Inter, 10);
+
   return (
-    <View style={{ height: 300, width: screenWidth }} >
-      <VictoryChart theme={VictoryTheme.clean}
-        domainPadding={10}
-        width={screenWidth}   // must be number
-        height={300}          // must be number
-        containerComponent={
-          <VictoryVoronoiContainer
-            labels={({ datum }) => `${getMonthName(datum.month)}: $${datum.rent.toFixed(2)}`}
-          />
-        }>
-        <VictoryAxis
-          label="Month"
-          tickFormat={t => `${getMonthName(t)}`}
-          tickCount={12}
-          tickValues={DATA.map(d => d.month)}
-          style={{
-            axisLabel: { padding: 30, fontSize: 12 },
-            tickLabels: { fontSize: 10 },
-          }}
-        />
-
-        <VictoryAxis
-          dependentAxis
-          label="Expenditure ($)"
-          style={{
-            axisLabel: { padding: 40, fontSize: 12 },
-            tickLabels: { fontSize: 10 },
-          }}
-        />
-
-        <VictoryLine
-          data={DATA}
-          // labelComponent={<VictoryTooltip />}
-          // labels={({ datum }) => datum.y}
-          x="month"
-          y="rent"
-          style={{
-            data: { stroke: "red", strokeWidth: 2 },
-          }}
-          interpolation={
-            "natural"
+    <View style={{ height: 300, width: screenWidth - 50 }} >
+      <CartesianChart
+        data={DATA}
+        xKey="month"
+        yKeys={lines.map((l) => l.key)}
+        domainPadding={{ right: 10, left: 10 }}
+        xAxis={{ font, formatXLabel: getMonthName, tickCount: 12 }}
+        yAxis={[
+          {
+            font
           }
-        />
-
-        {/* <VictoryLine
-          labelComponent={<VictoryTooltip />}
-          labels={({ datum }) => datum.y}
-          data={DATA}
-          x="month"
-          y="food"
-          style={{
-            data: { stroke: "green", strokeWidth: 2 },
-          }}
-          interpolation={
-            "natural"
-          }
-        />
-
-        <VictoryLine
-          labelComponent={<VictoryTooltip />}
-          labels={({ datum }) => datum.y}
-          data={DATA}
-          x="month"
-          y="entertainment"
-          style={{
-            data: { stroke: "orange", strokeWidth: 2 },
-          }}
-          interpolation={
-            "natural"
-          }
-        />
-        <VictoryLine
-          labelComponent={<VictoryTooltip />}
-          labels={({ datum }) => datum.y}
-          data={DATA}
-          x="month"
-          y="transport"
-          style={{
-            data: { stroke: "blue", strokeWidth: 2 },
-          }}
-          interpolation={
-            "natural"
-          }
-        /> */}
-
-        {/* <VictoryLegend
-          x={50}
-          y={0}
-          orientation="horizontal"
-          gutter={20}
-          style={{ labels: { fontSize: 12 } }}
-          data={[
-            { name: "Rent", symbol: { fill: "red" } },
-            { name: "Transport", symbol: { fill: "blue" } },
-            { name: "Food", symbol: { fill: "green" } },
-            { name: "Entertainment", symbol: { fill: "orange" } },
-          ]}
-        /> */}
-      </VictoryChart>
-
+        ]}
+        chartPressState={state}
+      >
+        {({ points }: { points: any }) => (
+          <>
+            {lines.map((line) => (
+              <Line
+                key={line.key}
+                points={points[line.key]}
+                color={line.color}
+                strokeWidth={3}
+              />
+            ))}
+            {isActive && (
+              lines.map((line) => (
+                <ToolTip key={line.key} x={state.x.position} y={state.y[line.key].position} category={{ name: line.key, color: line.color }} />
+              ))
+            )}
+          </>
+        )}
+      </CartesianChart>
     </View >
   );
 }

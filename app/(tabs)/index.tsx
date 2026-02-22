@@ -17,10 +17,9 @@ export default function HomeScreen() {
         />
       }
     >
-      <ExpenditureChart />
 
       <ThemedView style={styles.titleContainer}>
-
+        <ExpenditureChart />
         {/* <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
       </ThemedView>
