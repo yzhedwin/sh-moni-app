@@ -1,7 +1,7 @@
 import { Circle, Text as SkiaText, useFont } from "@shopify/react-native-skia";
 import React, { useState } from "react";
 import { Dimensions, Text, View } from "react-native";
-import { SharedValue, useAnimatedReaction } from "react-native-reanimated";
+import { useAnimatedReaction } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { CartesianChart, Line, useChartPressState } from "victory-native";
 import Inter from '../assets/fonts/Inter.ttf';
@@ -29,13 +29,31 @@ interface Category {
   color: string;
 }
 
-function ToolTip({ x, y, category }: { x: SharedValue<number>; y: SharedValue<number>; category: Category }) {
+interface Expenditure {
+  rent: ExpenditurePoint;
+  transport: ExpenditurePoint;
+  food: ExpenditurePoint;
+  entertainment: ExpenditurePoint;
+}
+
+interface ExpenditurePoint {
+  value: number;
+  position: Coordinate;
+}
+interface Coordinate {
+  x: number;
+  y: number;
+}
+
+function ToolTip({ expenditure, category }: { expenditure: ExpenditurePoint; category: Category }) {
   const font = useFont(Inter, 10);
+  const x = expenditure.position.x;
+  const y = expenditure.position.y;
 
   return (
     <>
       <Circle cx={x} cy={y} r={8} color={category.color} />
-      <SkiaText x={x} y={y} text={category.name.charAt(0).toUpperCase() + category.name.slice(1)} font={font} color="black" />
+      <SkiaText x={x - 10} y={y - 10} text={category.name.charAt(0).toUpperCase() + category.name.slice(1)} font={font} color="black" />
       {/* <SkiaText x={x} y={y} text={`$${y.get().toFixed(2)}`} font={font} color="black" /> */}
     </>
   );
@@ -45,6 +63,7 @@ export function ExpenditureChart() {
   const { state, isActive } = useChartPressState({ x: 0, y: { rent: 0, transport: 0, food: 0, entertainment: 0 } });
   const font = useFont(Inter, 10);
   const [total, setTotal] = useState(0);
+  const [expediture, setExpediture] = useState<Expenditure>();
 
   useAnimatedReaction(
     () =>
@@ -56,6 +75,12 @@ export function ExpenditureChart() {
       if (currentTotal !== previousTotal) {
         scheduleOnRN(setTotal, currentTotal);
       }
+      scheduleOnRN(setExpediture, {
+        rent: { value: state.y.rent.value.value, position: { x: state.x.position.value, y: state.y.rent.position.value } },
+        transport: { value: state.y.transport.value.value, position: { x: state.x.position.value, y: state.y.transport.position.value } },
+        food: { value: state.y.food.value.value, position: { x: state.x.position.value, y: state.y.food.position.value } },
+        entertainment: { value: state.y.entertainment.value.value, position: { x: state.x.position.value, y: state.y.entertainment.position.value } },
+      });
     }
   );
 
@@ -86,7 +111,7 @@ export function ExpenditureChart() {
             ))}
             {isActive && (
               lines.map((line) => (
-                <ToolTip key={line.key} x={state.x.position} y={state.y[line.key].position} category={{ name: line.key, color: line.color }} />
+                <ToolTip key={line.key} expenditure={expediture[line.key]} category={{ name: line.key, color: line.color }} />
               ))
             )}
           </>
