@@ -27,35 +27,23 @@ const MONTH_NAMES = [
   "Nov",
   "Dec",
 ];
-function getMonthName(monthIndex: number) {
-  return MONTH_NAMES[monthIndex % 12];
-}
 const screenWidth = Dimensions.get("window").width;
 const lines = [
-  { key: "rent", color: "red" },
-  { key: "transport", color: "blue" },
-  { key: "food", color: "green" },
-  { key: "entertainment", color: "orange" },
+  { name: "rent", color: "red" },
+  { name: "transport", color: "blue" },
+  { name: "food", color: "green" },
+  { name: "entertainment", color: "orange" },
+] as Category[];
+
+const EXPENDITURE_KEYS: ExpenditureCategory[] = [
+  "rent",
+  "transport",
+  "food",
+  "entertainment",
 ];
-interface Category {
-  name: string;
-  color: string;
-}
 
-interface Expenditure {
-  rent: ExpenditurePoint;
-  transport: ExpenditurePoint;
-  food: ExpenditurePoint;
-  entertainment: ExpenditurePoint;
-}
-
-interface ExpenditurePoint {
-  value: number;
-  position: Coordinate;
-}
-interface Coordinate {
-  x: number;
-  y: number;
+function getMonthName(monthIndex: number) {
+  return MONTH_NAMES[monthIndex % 12];
 }
 
 function ToolTip({
@@ -95,44 +83,22 @@ export function ExpenditureChart() {
 
   useAnimatedReaction(
     () =>
-      state.y.rent.value.value +
-      state.y.transport.value.value +
-      state.y.food.value.value +
-      state.y.entertainment.value.value,
+      EXPENDITURE_KEYS.reduce((sum, key) => sum + state.y[key].value.value, 0),
     (currentTotal, previousTotal) => {
       if (currentTotal !== previousTotal) {
         scheduleOnRN(setTotal, currentTotal);
       }
-      scheduleOnRN(setExpediture, {
-        rent: {
-          value: state.y.rent.value.value,
+      const expenditure = EXPENDITURE_KEYS.reduce((acc, key) => {
+        acc[key] = {
+          value: state.y[key].value.value,
           position: {
             x: state.x.position.value,
-            y: state.y.rent.position.value,
+            y: state.y[key].position.value,
           },
-        },
-        transport: {
-          value: state.y.transport.value.value,
-          position: {
-            x: state.x.position.value,
-            y: state.y.transport.position.value,
-          },
-        },
-        food: {
-          value: state.y.food.value.value,
-          position: {
-            x: state.x.position.value,
-            y: state.y.food.position.value,
-          },
-        },
-        entertainment: {
-          value: state.y.entertainment.value.value,
-          position: {
-            x: state.x.position.value,
-            y: state.y.entertainment.position.value,
-          },
-        },
-      });
+        };
+        return acc;
+      }, {} as Expenditure);
+      scheduleOnRN(setExpediture, expenditure);
     },
   );
 
@@ -141,7 +107,7 @@ export function ExpenditureChart() {
       <CartesianChart
         data={DATA}
         xKey="month"
-        yKeys={lines.map((l) => l.key)}
+        yKeys={lines.map((l) => l.name)}
         domainPadding={{ right: 10, left: 10 }}
         xAxis={{ font, formatXLabel: getMonthName, tickCount: 12 }}
         yAxis={[
@@ -154,21 +120,22 @@ export function ExpenditureChart() {
         {({ points }: { points: any }) => (
           <>
             {lines.map((line) => (
-              <Line
-                key={line.key}
-                points={points[line.key]}
-                color={line.color}
-                strokeWidth={3}
-              />
-            ))}
-            {isActive &&
-              lines.map((line) => (
-                <ToolTip
-                  key={line.key}
-                  expenditure={expediture[line.key]}
-                  category={{ name: line.key, color: line.color }}
+              <>
+                <Line
+                  key={line.name}
+                  points={points[line.name]}
+                  color={line.color}
+                  strokeWidth={3}
                 />
-              ))}
+                {isActive && (
+                  <ToolTip
+                    key={line.name + "-tooltip"}
+                    expenditure={expediture[line.name]}
+                    category={{ name: line.name, color: line.color }}
+                  />
+                )}
+              </>
+            ))}
           </>
         )}
       </CartesianChart>
@@ -180,3 +147,26 @@ export function ExpenditureChart() {
     </View>
   );
 }
+
+interface Category {
+  name: string;
+  color: string;
+}
+
+interface Expenditure {
+  rent: ExpenditurePoint;
+  transport: ExpenditurePoint;
+  food: ExpenditurePoint;
+  entertainment: ExpenditurePoint;
+}
+
+interface ExpenditurePoint {
+  value: number;
+  position: Coordinate;
+}
+interface Coordinate {
+  x: number;
+  y: number;
+}
+
+type ExpenditureCategory = keyof Expenditure;
