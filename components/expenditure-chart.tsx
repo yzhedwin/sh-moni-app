@@ -1,5 +1,5 @@
 import { Circle, Text as SkiaText, useFont } from "@shopify/react-native-skia";
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { Dimensions, Text, View } from "react-native";
 import { useAnimatedReaction } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
@@ -120,9 +120,9 @@ export function ExpenditureChart() {
         {({ points }: { points: any }) => (
           <>
             {lines.map((line) => (
-              <>
+              <Fragment key={line.name + "-fragment"}>
                 <Line
-                  key={line.name}
+                  key={line.name + "-line"}
                   points={points[line.name]}
                   color={line.color}
                   strokeWidth={3}
@@ -134,7 +134,7 @@ export function ExpenditureChart() {
                     category={{ name: line.name, color: line.color }}
                   />
                 )}
-              </>
+              </Fragment>
             ))}
           </>
         )}
