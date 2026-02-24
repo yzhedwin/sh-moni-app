@@ -4,7 +4,7 @@ import { Dimensions, Text, View } from "react-native";
 import { useAnimatedReaction } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 import { CartesianChart, Line, useChartPressState } from "victory-native";
-import Inter from "../assets/fonts/Inter.ttf";
+import Inter from "../../assets/fonts/Inter.ttf";
 
 const DATA = Array.from({ length: 12 }, (_, i) => ({
   month: i,
@@ -72,7 +72,7 @@ function ToolTip({
   );
 }
 
-export function ExpenditureChart() {
+export function TrendChart() {
   const { state, isActive } = useChartPressState({
     x: 0,
     y: { rent: 0, transport: 0, food: 0, entertainment: 0 },
@@ -103,7 +103,7 @@ export function ExpenditureChart() {
   );
 
   return (
-    <View style={{ height: 300, width: screenWidth - 50 }}>
+    <View style={{ height: 300, width: screenWidth - 100 }}>
       <CartesianChart
         data={DATA}
         xKey="month"

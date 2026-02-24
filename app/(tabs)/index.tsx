@@ -1,100 +1,198 @@
-import { ExpenditureChart } from '@/components/expenditure-chart';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedView } from '@/components/themed-view';
-import { Image } from 'expo-image';
-import { StyleSheet } from 'react-native';
+import CategoryChart from "@/components/charts/category-chart";
+import { TrendChart } from "@/components/charts/trend-chart";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Colors } from "@/constants/theme";
+import { useThemeColor } from "@/hooks/use-theme-color";
+import { useMemo, useState } from "react";
+import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { SceneMap, TabView } from "react-native-tab-view";
 
+const expenses = [
+  { id: "1", name: "Rent", description: "February Rent", price: 1200 },
+  { id: "2", name: "Food", description: "Groceries", price: 250 },
+  { id: "3", name: "Transport", description: "MRT Top-up", price: 50 },
+];
 
+const CategoryRoute = () => (
+  <View style={styles.chartContainer}>
+    <CategoryChart />
+  </View>
+);
+
+const TrendRoute = () => (
+  <View style={styles.chartContainer}>
+    <TrendChart />
+  </View>
+);
 
 export default function HomeScreen() {
+  const layout = useWindowDimensions();
+  const [tabIndex, setTabIndex] = useState(0);
+  const [routes] = useState([
+    { key: "category", title: "Category" },
+    { key: "trend", title: "Trend" },
+  ]);
+
+  const totalExpense = useMemo(() => {
+    return expenses.reduce((sum, item) => sum + item.price, 0);
+  }, []);
+
+  const renderScene = SceneMap({
+    category: CategoryRoute,
+    trend: TrendRoute,
+  });
+  const backgroundColor = useThemeColor(
+    { light: Colors.light.background, dark: Colors.dark.background },
+    "background",
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }
-    >
+    <SafeAreaView style={[{ backgroundColor }]}>
+      <ThemedView style={styles.header}>
+        <ThemedText type="subtitle">
+          Show total expense for this month
+        </ThemedText>
+      </ThemedView>
+      <ThemedView style={styles.totalContainer}>
+        <ThemedText style={styles.totalLabel}>
+          Total Expense This Month
+        </ThemedText>
+        <ThemedText type="title" style={styles.totalAmount}>
+          ${totalExpense.toFixed(2)}
+        </ThemedText>
+      </ThemedView>
 
       <ThemedView style={styles.titleContainer}>
-        <ExpenditureChart />
-        {/* <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
+        <TabView
+          navigationState={{ index: tabIndex, routes }}
+          renderScene={renderScene}
+          onIndexChange={setTabIndex}
+          initialLayout={{ width: layout.width }}
+          renderTabBar={
+            (props) => null
+            // <TabBar
+            //   {...props}
+            //   indicatorStyle={{ backgroundColor: "black" }}
+            //   style={{ backgroundColor: "black", borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
+            // />
+          }
+        />
+        <View style={styles.tabIndicator}>
+          {routes.map((_, i) => (
+            <View
+              key={i}
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                marginHorizontal: 4,
+                backgroundColor: tabIndex === i ? "black" : "#ccc",
+              }}
             />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+          ))}
+        </View>
+      </ThemedView>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText> */}
+        <ThemedText style={styles.sectionTitle}>Expense List</ThemedText>
+
+        <View style={styles.tableHeader}>
+          <ThemedText style={styles.headerCell}>Name</ThemedText>
+          <ThemedText style={styles.headerCell}>Description</ThemedText>
+          <ThemedText style={styles.headerCell}>Price</ThemedText>
+        </View>
+
+        <FlatList
+          data={expenses}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.row}>
+              <ThemedText style={styles.cell}>{item.name}</ThemedText>
+              <ThemedText style={styles.cell}>{item.description}</ThemedText>
+              <ThemedText style={styles.cell}>
+                ${item.price.toFixed(2)}
+              </ThemedText>
+            </View>
+          )}
+        />
       </ThemedView>
-    </ParallaxScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  header: {
+    height: 150,
+    backgroundColor: "#0f120f",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  totalContainer: {
+    position: "absolute",
+    top: 120,
+    left: 16,
+    right: 16,
+    borderRadius: 12,
+    backgroundColor: "#51089f",
+    padding: 16,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1,
+  },
+  totalLabel: {
+    opacity: 0.6,
+  },
+  totalAmount: {
+    marginTop: 24,
+    fontWeight: "bold",
+  },
+
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    backgroundColor: "#efefef",
+    marginTop: -30,
+    paddingTop: 50,
+    paddingBottom: 16,
+    height: 400,
+  },
+  chartContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+    padding: 16,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  sectionTitle: {
+    marginBottom: 10,
+    fontWeight: "bold",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    paddingBottom: 6,
+    marginBottom: 6,
+  },
+  headerCell: {
+    flex: 1,
+    fontWeight: "bold",
+  },
+  row: {
+    flexDirection: "row",
+    paddingVertical: 8,
+    borderBottomWidth: 0.5,
+  },
+  cell: {
+    flex: 1,
+  },
+  tabIndicator: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 8,
   },
 });
