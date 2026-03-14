@@ -8,58 +8,48 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   >();
   const [profile, setProfile] = useState<any>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
   // Fetch the claims once, and subscribe to auth state changes
   useEffect(() => {
     const fetchClaims = async () => {
       setIsLoading(true);
-
       const { data, error } = await supabase.auth.getClaims();
-
       if (error) {
         console.error("Error fetching claims:", error);
       }
-
       setClaims(data?.claims ?? null);
       setIsLoading(false);
     };
-
     fetchClaims();
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, _session) => {
-      console.log("Auth state changed:", { event: _event });
-      const { data } = await supabase.auth.getClaims();
-      setClaims(data?.claims ?? null);
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        setClaims(null);
+      } else {
+        setClaims(session.user);
+      }
     });
-
     // Cleanup subscription on unmount
     return () => {
       subscription.unsubscribe();
     };
   }, []);
-
   // Fetch the profile when the claims change
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
-
       if (claims) {
         const { data } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", claims.sub)
           .single();
-
         setProfile(data);
       } else {
         setProfile(null);
       }
-
       setIsLoading(false);
     };
-
     fetchProfile();
   }, [claims]);
 
