@@ -1,8 +1,10 @@
 import CategoryChart from "@/components/charts/category-chart";
 import { TrendChart } from "@/components/charts/trend-chart";
+import SignOutButton from "@/components/social-auth-buttons/sign-out-button";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
+import { useAuthContext } from "@/hooks/use-auth-context";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { useMemo, useState } from "react";
 import { FlatList, StyleSheet, View, useWindowDimensions } from "react-native";
@@ -29,6 +31,8 @@ const TrendRoute = () => (
 
 export default function HomeScreen() {
   const layout = useWindowDimensions();
+  const { profile } = useAuthContext();
+
   const [tabIndex, setTabIndex] = useState(0);
   const [routes] = useState([
     { key: "category", title: "Category" },
@@ -50,6 +54,23 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[{ backgroundColor }]}>
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="subtitle">Username</ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText>{profile?.username}</ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="subtitle">Full name</ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.stepContainer}>
+        <ThemedText>{profile?.full_name}</ThemedText>
+      </ThemedView>
+
+      <SignOutButton />
       <ThemedView style={styles.header}>
         <ThemedText type="subtitle">
           Show total expense for this month
