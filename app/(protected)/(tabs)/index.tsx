@@ -1,46 +1,8 @@
 import Action from "@/components/action";
 import Transaction from "@/components/transactions";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-
-// const expenses = [
-//   { id: "1", name: "Rent", description: "February Rent", price: 1200 },
-//   { id: "2", name: "Food", description: "Groceries", price: 250 },
-//   { id: "3", name: "Transport", description: "MRT Top-up", price: 50 },
-// ];
-
-// const CategoryRoute = () => (
-//   <View style={styles.chartContainer}>
-//     <CategoryChart />
-//   </View>
-// );
-
-// const TrendRoute = () => (
-//   <View style={styles.chartContainer}>{/* <TrendChart /> */}</View>
-// );
-
-// export default function HomeScreen() {
-//   const layout = useWindowDimensions();
-//   const { profile } = useAuthContext();
-
-//   const [tabIndex, setTabIndex] = useState(0);
-//   const [routes] = useState([
-//     { key: "category", title: "Category" },
-//     { key: "trend", title: "Trend" },
-//   ]);
-
-//   const totalExpense = useMemo(() => {
-//     return expenses.reduce((sum, item) => sum + item.price, 0);
-//   }, []);
-
-//   const renderScene = SceneMap({
-//     category: CategoryRoute,
-//     trend: TrendRoute,
-//   });
-//   const backgroundColor = useThemeColor(
-//     { light: Colors.light.background, dark: Colors.dark.background },
-//     "background",
-//   );
 
 export default function HomeScreen() {
   return (
@@ -59,8 +21,20 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionsRow}>
           <Action icon="add" label="Add Expense" />
-          <Action icon="cloud-upload" label="Upload File" />
-          <Action icon="stats-chart" label="Analytics" />
+          <Action
+            icon="cloud-upload"
+            label="Upload File"
+            onPress={() => {
+              router.push("/upload");
+            }}
+          />
+          <Action
+            icon="stats-chart"
+            label="Analytics"
+            onPress={() => {
+              router.push("/analytics");
+            }}
+          />
         </View>
       </View>
 

@@ -12,7 +12,8 @@ export default function ProtectedLayout() {
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="upload-file" options={{ headerShown: false }} />
+      <Stack.Screen name="upload/index" options={{ headerShown: false }} />
+      <Stack.Screen name="analytics/index" options={{ headerShown: false }} />
     </Stack>
   );
 }

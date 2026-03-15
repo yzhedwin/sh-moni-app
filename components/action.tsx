@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
-export default function Action({ icon, label }: any) {
+export default function Action({ icon, label, onPress }: any) {
   return (
-    <TouchableOpacity style={styles.actionCard}>
+    <TouchableOpacity style={styles.actionCard} onPress={onPress}>
       <Ionicons name={icon} size={22} color="#059669" />
       <Text style={styles.actionText}>{label}</Text>
     </TouchableOpacity>

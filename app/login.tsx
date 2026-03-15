@@ -51,6 +51,7 @@ export default function LoginScreen() {
   };
 
   const handleSignUp = async () => {
+    //TODO: navigate to sign up page
     setLoading(true);
     await signUpNewUser({ email, password });
     setLoading(false);
