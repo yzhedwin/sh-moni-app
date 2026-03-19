@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-
+//click to view attachment and stuff
 export default function Transaction({ name, category, amount }: any) {
   return (
     <View style={styles.transaction}>
