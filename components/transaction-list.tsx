@@ -140,11 +140,14 @@ export default function TransactionList({
   );
 }
 
-type Transaction = {
+export type Transaction = {
   id: string;
   name: string;
   category: string;
+  description: string;
   amount: number;
+  currency: string;
+  is_recurring: boolean;
   date: string; // ISO string
 };
 

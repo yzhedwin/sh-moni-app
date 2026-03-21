@@ -1,17 +1,11 @@
 import Footer from "@/components/chat/footer";
 import InputBar from "@/components/chat/input-bar";
 import MessageBubble, { Message } from "@/components/chat/message-bubble";
+import { Transaction } from "@/components/transaction-list";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import React, { useMemo, useState } from "react";
 import { View } from "react-native";
-
-type Transaction = {
-  id: string;
-  amount: number;
-  category: string;
-  description: string;
-};
 
 interface Props {
   sheetRef: React.RefObject<BottomSheetMethods | null>;
@@ -35,10 +29,14 @@ export default function ExpenseChatScreen({ sheetRef }: Props) {
     setTimeout(() => {
       const parsed: Transaction[] = [
         {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
+          name: "McDonalds",
+          currency: "SGD",
+          is_recurring: false,
           amount: 18,
           category: "Food",
           description: "Lunch with John",
+          date: Date.now().toString(),
         },
       ];
 

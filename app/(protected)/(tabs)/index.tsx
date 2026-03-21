@@ -132,17 +132,17 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <View style={styles.actionsRow}>
-          <Action icon="add" label="Add Expense" />
+          <Action
+            icon="add"
+            label="Add Expense"
+            onPress={() => chatSheetRef.current?.expand()}
+          />
           <Action
             icon="cloud-upload"
             label="Upload File"
             onPress={() => uploadSheetRef.current?.expand()}
           />
-          <Action
-            icon="stats-chart"
-            label="Analytics"
-            onPress={() => chatSheetRef.current?.expand()}
-          />
+          <Action icon="stats-chart" label="Analytics" />
         </View>
       </View>
 
