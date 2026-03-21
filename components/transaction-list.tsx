@@ -73,7 +73,7 @@ export default function TransactionList({
         d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear
       );
     });
-  }, [transactions, selectedMonth]);
+  }, [transactions, selectedMonth, selectedYear]);
 
   const groupByDate = useMemo(() => {
     return filteredTransactions.reduce(

@@ -1,10 +1,9 @@
 import Action from "@/components/action";
-import TransactionList, {
-  DUMMY_TRANSACTIONS,
-} from "@/components/transaction-list";
+import TransactionList, { Transaction } from "@/components/transaction-list";
+import { supabase } from "@/lib/supabase";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   GestureHandlerRootView,
@@ -65,6 +64,29 @@ export default function HomeScreen() {
     }), // e.g. "Mar 2026"
     value: `${new Date().getFullYear()}-${new Date().getMonth() + 1}`, // unique key}
   });
+  const [transactions, setTransactions] = useState<Transaction[]>();
+
+  useEffect(() => {
+    const getTransactions = async () => {
+      try {
+        const { data: transactions, error } = await supabase
+          .from("transactions")
+          .select();
+        if (error) {
+          console.error("Error fetching transactions:", error.message);
+          return;
+        }
+
+        if (transactions && transactions.length > 0) {
+          setTransactions(transactions);
+        }
+      } catch (error: any) {
+        console.error("Error fetching transactions:", error.message);
+      }
+    };
+
+    getTransactions();
+  }, []);
 
   const getExpenditure = (month: number) => {
     return DUMMY_TOTAL_EXPENDITURES.find((item) => item.month === month);
@@ -162,7 +184,7 @@ export default function HomeScreen() {
 
         <ScrollView style={styles.section}>
           <TransactionList
-            transactions={DUMMY_TRANSACTIONS}
+            transactions={transactions || []}
             selectedMonth={expenditureMonth.month}
             selectedYear={expenditureMonth.year}
           />
