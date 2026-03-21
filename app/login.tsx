@@ -49,7 +49,6 @@ export default function LoginScreen() {
       });
     }
   };
-
   const handleSignUp = async () => {
     //TODO: navigate to sign up page
     setLoading(true);
@@ -112,7 +111,7 @@ export default function LoginScreen() {
 
             <TouchableOpacity>
               <Text style={styles.signup} onPress={handleSignUp}>
-                Don't have an account? Sign up
+                Don&apos;t have an account? Sign up
               </Text>
             </TouchableOpacity>
           </View>

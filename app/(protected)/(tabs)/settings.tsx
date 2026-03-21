@@ -1,6 +1,7 @@
 import { onSignOutButtonPress } from "@/components/social-auth-buttons/sign-out-button";
 import { Ionicons } from "@expo/vector-icons";
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 function SettingRow({ icon, label, onPress }: any) {
   return (
     <TouchableOpacity style={styles.settingRow} onPress={onPress}>
@@ -12,18 +13,20 @@ function SettingRow({ icon, label, onPress }: any) {
 }
 export default function SettingsScreen() {
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.sectionTitle}>Settings</Text>
-      <SettingRow icon="person" label="Account" />
-      <SettingRow icon="notifications" label="Notifications" />
-      <SettingRow icon="card" label="Payment Methods" />
-      <SettingRow icon="cloud-upload" label="Data Backup" />
-      <SettingRow
-        icon="log-out"
-        label="Logout"
-        onPress={onSignOutButtonPress}
-      />
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={{ padding: 16 }}>
+        <Text style={styles.sectionTitle}>Settings</Text>
+        <SettingRow icon="person" label="Account" />
+        <SettingRow icon="notifications" label="Notifications" />
+        <SettingRow icon="card" label="Payment Methods" />
+        <SettingRow icon="cloud-upload" label="Data Backup" />
+        <SettingRow
+          icon="log-out"
+          label="Logout"
+          onPress={onSignOutButtonPress}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
@@ -32,7 +35,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8fafc",
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "600",
     marginBottom: 14,
   },
