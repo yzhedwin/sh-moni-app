@@ -35,3 +35,19 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+
+export type TransactionType = {
+  description: string;
+  category: string;
+  amount: number;
+  transaction_date: Date;
+  is_recurring: boolean;
+  currency: string;
+};
+
+export type ExpenditureMonth = {
+  month: number;
+  year: number;
+  label: string;
+  value: string;
+};

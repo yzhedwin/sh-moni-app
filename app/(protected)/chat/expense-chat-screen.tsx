@@ -1,22 +1,29 @@
 import Footer from "@/components/chat/footer";
 import InputBar from "@/components/chat/input-bar";
 import MessageBubble, { Message } from "@/components/chat/message-bubble";
-import { Transaction } from "@/components/transaction-list";
+import { DUMMY_TRANSACTIONS } from "@/constants/dummy";
+import { useAuthContext } from "@/hooks/use-auth-context";
+import { supabase } from "@/lib/supabase";
+import { Tables } from "@/model/supabase-types";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import * as Crypto from "expo-crypto";
 import React, { useMemo, useState } from "react";
 import { View } from "react-native";
 
 interface Props {
   sheetRef: React.RefObject<BottomSheetMethods | null>;
+  categories: Tables<"categories">[] | undefined;
 }
 
-export default function ExpenseChatScreen({ sheetRef }: Props) {
+export default function ExpenseChatScreen({ sheetRef, categories }: Props) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-
+  const [transactions, setTransactions] = useState<Tables<"transactions">[]>(
+    [],
+  );
+  const { profile } = useAuthContext();
   const snapPoints = useMemo(() => ["70%"], []);
 
   const sendMessage = async () => {
@@ -26,17 +33,28 @@ export default function ExpenseChatScreen({ sheetRef }: Props) {
     setMessages((prev) => [...prev, userMessage]);
     setLoading(true);
 
+    //TODO: fetch from API
     setTimeout(() => {
-      const parsed: Transaction[] = [
+      const t =
+        DUMMY_TRANSACTIONS[
+          Math.floor(Math.random() * DUMMY_TRANSACTIONS.length)
+        ];
+
+      const categoryID = categories?.find((c) => c.name === t!.category)?.id;
+      const parsed: Tables<"transactions">[] = [
         {
-          id: crypto.randomUUID(),
-          name: "McDonalds",
-          currency: "SGD",
-          is_recurring: false,
-          amount: 18,
-          category: "Food",
-          description: "Lunch with John",
-          date: Date.now().toString(),
+          id: Crypto.randomUUID(),
+          currency: t!.currency,
+          is_recurring: t!.is_recurring || false,
+          amount: t!.amount,
+          category_id: categoryID || "others",
+          description: t!.description,
+          transaction_date: t!.transaction_date.toISOString(),
+          account_id: null,
+          created_at: new Date().toISOString(),
+          metadata: null,
+          updated_at: new Date().toISOString(),
+          user_id: profile.id,
         },
       ];
 
@@ -55,7 +73,7 @@ export default function ExpenseChatScreen({ sheetRef }: Props) {
 
   const updateTransaction = (
     id: string,
-    field: keyof Transaction,
+    field: keyof Tables<"transactions">,
     value: any,
   ) => {
     setTransactions((prev) =>
@@ -63,8 +81,16 @@ export default function ExpenseChatScreen({ sheetRef }: Props) {
     );
   };
 
-  const saveTransactions = () => {
+  const saveTransactions = async () => {
     console.log("Saving:", transactions);
+    try {
+      const { data, error } = await supabase
+        .from("transactions")
+        .insert(transactions)
+        .select();
+    } catch (error) {
+      console.debug(error);
+    }
   };
 
   return (
@@ -91,6 +117,7 @@ export default function ExpenseChatScreen({ sheetRef }: Props) {
           ListFooterComponent={
             <Footer
               loading={loading}
+              categories={categories}
               transactions={transactions}
               updateTransaction={updateTransaction}
               saveTransactions={saveTransactions}

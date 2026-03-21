@@ -12,16 +12,66 @@ import {
   signInWithEmail,
   signUpNewUser,
 } from "@/components/social-auth-buttons/email/sign-in-button";
+import { DEFAULT_CATEGORIES } from "@/constants/default";
+import { useAuthContext } from "@/hooks/use-auth-context";
+import { supabase } from "@/lib/supabase";
+import { Tables } from "@/model/supabase-types";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
+const addCategory = async (userID: string, category: Tables<"categories">) => {
+  if (userID === undefined) return;
+  const c = {
+    id: category.id,
+    name: category!.name,
+    created_at: new Date().toISOString(),
+    color: null,
+    parent_id: null,
+    user_id: userID,
+    type: "test",
+  };
+  const { data, error } = await supabase.from("categories").insert(c).select();
+  // optional: return inserted row
+  if (error) {
+    console.error("Insert error:", error);
+  } else {
+    console.log("Inserted category:", data);
+  }
+};
+const addUser = async (userID: string) => {
+  if (userID === undefined) return;
+
+  const u = {
+    id: userID,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  } as Tables<"profiles">;
+
+  const { data, error } = await supabase.from("profiles").insert(u);
+  if (error) {
+    console.error("Insert error:", error);
+  } else {
+    console.log("Inserted user:", data);
+  }
+};
+const initializeDB = async (userID: string) => {
+  if (userID === undefined) return;
+  await addUser(userID);
+  //TODO: initialize DB
+  console.debug("Initializing DB");
+  DEFAULT_CATEGORIES.forEach(async (category) => {
+    await addCategory(userID, category);
+  });
+};
+
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { profile } = useAuthContext();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -53,6 +103,7 @@ export default function LoginScreen() {
     //TODO: navigate to sign up page
     setLoading(true);
     await signUpNewUser({ email, password });
+    await initializeDB(profile?.id);
     setLoading(false);
   };
   return (

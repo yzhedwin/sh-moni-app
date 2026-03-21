@@ -1,3 +1,4 @@
+import { Database } from "@/model/supabase-types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 
@@ -18,7 +19,7 @@ const ExpoWebSecureStoreAdapter = {
     return AsyncStorage.removeItem(key);
   },
 };
-export const supabase = createClient(
+export const supabase = createClient<Database>(
   process.env.EXPO_PUBLIC_SUPABASE_URL ?? "",
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? "",
   {

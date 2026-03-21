@@ -1,6 +1,9 @@
 import Action from "@/components/action";
-import TransactionList, { Transaction } from "@/components/transaction-list";
+import TransactionList from "@/components/transaction-list";
+import { ExpenditureMonth } from "@/components/transactions";
+import { DUMMY_TOTAL_EXPENDITURES } from "@/constants/dummy";
 import { supabase } from "@/lib/supabase";
+import { Tables } from "@/model/supabase-types";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -12,49 +15,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import ExpenseChatScreen from "../chat/expense-chat-screen";
 
-//to fetch from db on refresh
-const DUMMY_TOTAL_EXPENDITURES = [
-  {
-    id: "1",
-    month: 10,
-    amount: 1200,
-  },
-  {
-    id: "2",
-    month: 11,
-    amount: 250,
-  },
-  {
-    id: "3",
-    month: 12,
-    amount: 50,
-  },
-  {
-    id: "4",
-    month: 1,
-    amount: 1500,
-  },
-  {
-    id: "5",
-    month: 2,
-    amount: 620,
-  },
-  {
-    id: "6",
-    month: 3,
-    amount: 820,
-  },
-];
-type ExpenditureMonth = {
-  month: number;
-  year: number;
-  label: string;
-  value: string;
-};
 export default function HomeScreen() {
-  const uploadSheetRef = useRef<BottomSheet>(null);
-  const chatSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["25%", "50%"], []);
+  const [transactions, setTransactions] = useState<Tables<"transactions">[]>();
+  const [categories, setCategories] = useState<Tables<"categories">[]>();
   const [expenditureMonth, setExpenditureMonth] = useState<ExpenditureMonth>({
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
@@ -64,7 +27,32 @@ export default function HomeScreen() {
     }), // e.g. "Mar 2026"
     value: `${new Date().getFullYear()}-${new Date().getMonth() + 1}`, // unique key}
   });
-  const [transactions, setTransactions] = useState<Transaction[]>();
+
+  const uploadSheetRef = useRef<BottomSheet>(null);
+  const chatSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ["25%", "50%"], []);
+
+  useEffect(() => {
+    const getCategories = async () => {
+      try {
+        const { data: categories, error } = await supabase
+          .from("categories")
+          .select();
+        if (error) {
+          console.error("Error fetching categories:", error.message);
+          return;
+        }
+
+        if (categories && categories.length > 0) {
+          setCategories(categories);
+        }
+      } catch (error: any) {
+        console.error("Error fetching categories:", error.message);
+      }
+    };
+
+    getCategories();
+  }, []);
 
   useEffect(() => {
     const getTransactions = async () => {
@@ -184,12 +172,13 @@ export default function HomeScreen() {
 
         <ScrollView style={styles.section}>
           <TransactionList
+            categories={categories || []}
             transactions={transactions || []}
             selectedMonth={expenditureMonth.month}
             selectedYear={expenditureMonth.year}
           />
         </ScrollView>
-        <ExpenseChatScreen sheetRef={chatSheetRef} />
+        <ExpenseChatScreen sheetRef={chatSheetRef} categories={categories} />
         <BottomSheet
           ref={uploadSheetRef}
           index={-1} // closed by default

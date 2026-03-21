@@ -1,12 +1,24 @@
+import { Tables } from "@/model/supabase-types";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { Text, TextInput } from "react-native-gesture-handler";
-
+interface Props {
+  loading: boolean;
+  categories: Tables<"categories">[] | undefined;
+  transactions: Tables<"transactions">[];
+  updateTransaction: (
+    id: string,
+    field: keyof Tables<"transactions">,
+    value: any,
+  ) => void;
+  saveTransactions: () => void;
+}
 export default function Footer({
   loading,
+  categories,
   transactions,
   updateTransaction,
   saveTransactions,
-}: any) {
+}: Props) {
   return (
     <>
       {loading && <ActivityIndicator color="white" style={{ marginTop: 10 }} />}
@@ -45,10 +57,15 @@ export default function Footer({
               />
 
               <TextInput
-                value={t.category}
-                onChangeText={(text) =>
-                  updateTransaction(t.id, "category", text)
+                value={
+                  categories?.find((c: any) => c.id === t.category_id)?.name
                 }
+                onChangeText={(text) => {
+                  const category = categories?.find(
+                    (c: any) => c.name === text,
+                  );
+                  updateTransaction(t.id, "category_id", category);
+                }}
                 style={{ color: "white" }}
               />
             </View>

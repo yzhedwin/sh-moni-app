@@ -1,74 +1,22 @@
+import { Tables } from "@/model/supabase-types";
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-
-export const DUMMY_TRANSACTIONS = [
-  {
-    id: "1",
-    date: "2026-01-01",
-    amount: -20,
-    category: "Food",
-    name: "KFC",
-  },
-  {
-    id: "2",
-    date: "2026-01-26",
-    amount: -12,
-    category: "Food",
-    name: "McDonalds",
-  },
-  {
-    id: "3",
-    date: "2026-01-13",
-    amount: -15,
-    category: "Food",
-    name: "HDL",
-  },
-  {
-    id: "4",
-    date: "2026-01-25",
-    amount: -25,
-    category: "Food",
-    name: "Burger King",
-  },
-  {
-    id: "5",
-    date: "2026-01-12",
-    amount: -6,
-    category: "Food",
-    name: "Pizza Hut",
-  },
-  {
-    id: "6",
-    date: "2026-01-05",
-    amount: -7,
-    category: "Food",
-    name: "Subway",
-  },
-  {
-    id: "7",
-    date: "2026-01-03",
-    amount: -7,
-    category: "Food",
-    name: "Starbucks",
-  },
-  {
-    id: "8",
-    date: "2026-01-02",
-    amount: -12,
-    category: "Food",
-    name: "Taco Bell",
-  },
-] as Transaction[];
-
+interface Props {
+  categories: Tables<"categories">[];
+  transactions: Tables<"transactions">[];
+  selectedMonth: number;
+  selectedYear: number;
+}
 export default function TransactionList({
+  categories,
   transactions,
   selectedMonth,
   selectedYear,
 }: Props) {
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
-      const d = new Date(t.date);
+      const d = new Date(t.transaction_date);
       return (
         d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear
       );
@@ -78,12 +26,12 @@ export default function TransactionList({
   const groupByDate = useMemo(() => {
     return filteredTransactions.reduce(
       (acc, t) => {
-        const date = new Date(t.date).toDateString();
+        const date = new Date(t.transaction_date).toDateString();
         if (!acc[date]) acc[date] = [];
         acc[date].push(t);
         return acc;
       },
-      {} as Record<string, Transaction[]>,
+      {} as Record<string, Tables<"transactions">[]>,
     );
   }, [filteredTransactions]);
 
@@ -118,9 +66,9 @@ export default function TransactionList({
               }}
             >
               <View>
-                <Text style={{ fontWeight: "500" }}>{t.name}</Text>
+                <Text style={{ fontWeight: "500" }}>{t.description}</Text>
                 <Text style={{ color: "#6b7280", fontSize: 12 }}>
-                  {t.category}
+                  {categories.find((c) => c.id === t.category_id)?.name}
                 </Text>
               </View>
 
@@ -139,23 +87,6 @@ export default function TransactionList({
     </Animated.View>
   );
 }
-
-export type Transaction = {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  amount: number;
-  currency: string;
-  is_recurring: boolean;
-  date: string; // ISO string
-};
-
-type Props = {
-  transactions: Transaction[];
-  selectedMonth: number;
-  selectedYear: number;
-};
 
 const styles = StyleSheet.create({
   section: {
