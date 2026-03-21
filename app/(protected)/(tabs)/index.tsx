@@ -10,6 +10,7 @@ import {
   GestureHandlerRootView,
   ScrollView,
 } from "react-native-gesture-handler";
+import ExpenseChatScreen from "../chat/expense-chat-screen";
 
 //to fetch from db on refresh
 const DUMMY_TOTAL_EXPENDITURES = [
@@ -52,6 +53,7 @@ type ExpenditureMonth = {
 };
 export default function HomeScreen() {
   const uploadSheetRef = useRef<BottomSheet>(null);
+  const chatSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["25%", "50%"], []);
   const [expenditureMonth, setExpenditureMonth] = useState<ExpenditureMonth>({
     month: new Date().getMonth() + 1,
@@ -139,7 +141,7 @@ export default function HomeScreen() {
           <Action
             icon="stats-chart"
             label="Analytics"
-            // onPress={() => bottomSheetRef.current?.expand()}
+            onPress={() => chatSheetRef.current?.expand()}
           />
         </View>
       </View>
@@ -151,6 +153,7 @@ export default function HomeScreen() {
           selectedYear={expenditureMonth.year}
         />
       </ScrollView>
+      <ExpenseChatScreen sheetRef={chatSheetRef} />
       <BottomSheet
         ref={uploadSheetRef}
         index={-1} // closed by default
