@@ -58,11 +58,13 @@ export default function Footer({
 
               <TextInput
                 value={
-                  categories?.find((c: any) => c.id === t.category_id)?.name
+                  categories?.find(
+                    (c: Tables<"categories">) => c.id === t.category_id,
+                  )?.name
                 }
                 onChangeText={(text) => {
                   const category = categories?.find(
-                    (c: any) => c.name === text,
+                    (c: Tables<"categories">) => c.name === text,
                   );
                   updateTransaction(t.id, "category_id", category);
                 }}

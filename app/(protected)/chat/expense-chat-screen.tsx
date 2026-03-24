@@ -1,13 +1,11 @@
 import Footer from "@/components/chat/footer";
 import InputBar from "@/components/chat/input-bar";
 import MessageBubble, { Message } from "@/components/chat/message-bubble";
-import { DUMMY_TRANSACTIONS } from "@/constants/dummy";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import { supabase } from "@/lib/supabase";
 import { Tables } from "@/model/supabase-types";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import * as Crypto from "expo-crypto";
 import React, { useMemo, useState } from "react";
 import { View } from "react-native";
 
@@ -34,39 +32,61 @@ export default function ExpenseChatScreen({ sheetRef, categories }: Props) {
     setLoading(true);
 
     //TODO: fetch from API
-    setTimeout(() => {
-      const t =
-        DUMMY_TRANSACTIONS[
-          Math.floor(Math.random() * DUMMY_TRANSACTIONS.length)
-        ];
-
-      const categoryID = categories?.find((c) => c.name === t!.category)?.id;
-      const parsed: Tables<"transactions">[] = [
+    const session = await supabase.auth.getSession();
+    if (!session?.data?.session) return;
+    try {
+      const res = await fetch(
+        process.env.EXPO_PUBLIC_MONI_API_URL + "/chat/deepseek",
         {
-          id: Crypto.randomUUID(),
-          currency: t!.currency,
-          is_recurring: t!.is_recurring || false,
-          amount: t!.amount,
-          category_id: categoryID || "others",
-          description: t!.description,
-          transaction_date: t!.transaction_date.toISOString(),
-          account_id: null,
-          created_at: new Date().toISOString(),
-          metadata: null,
-          updated_at: new Date().toISOString(),
-          user_id: profile.id,
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session?.data?.session?.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: input,
+          }),
         },
-      ];
+      );
 
-      setTransactions(parsed);
+      const { reply } = await res.json();
+      setMessages((prev) => [...prev, { type: "ai", text: reply }]);
+    } catch (error) {
+      console.debug(error);
+    }
+    // setTimeout(() => {
+    //   const t =
+    //     DUMMY_TRANSACTIONS[
+    //       Math.floor(Math.random() * DUMMY_TRANSACTIONS.length)
+    //     ];
 
-      setMessages((prev) => [
-        ...prev,
-        { type: "ai", text: "I found 1 expense. Review below 👇" },
-      ]);
+    //   const categoryID = categories?.find((c) => c.name === t!.category)?.id;
+    //   const parsed: Tables<"transactions">[] = [
+    //     {
+    //       id: Crypto.randomUUID(),
+    //       currency: t!.currency,
+    //       is_recurring: t!.is_recurring || false,
+    //       amount: t!.amount,
+    //       category_id: categoryID || "others",
+    //       description: t!.description,
+    //       transaction_date: t!.transaction_date.toISOString(),
+    //       account_id: null,
+    //       created_at: new Date().toISOString(),
+    //       metadata: null,
+    //       updated_at: new Date().toISOString(),
+    //       user_id: profile.id,
+    //     },
+    //   ];
 
-      setLoading(false);
-    }, 1000);
+    //   setTransactions(parsed);
+
+    //   setMessages((prev) => [
+    //     ...prev,
+    //     { type: "ai", text: "I found 1 expense. Review below 👇" },
+    //   ]);
+
+    //   setLoading(false);
+    // }, 1000);
 
     setInput("");
   };
