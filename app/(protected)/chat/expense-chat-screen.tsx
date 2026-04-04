@@ -3,7 +3,7 @@ import InputBar from "@/components/chat/input-bar";
 import MessageBubble, { Message } from "@/components/chat/message-bubble";
 import { useAuthContext } from "@/hooks/use-auth-context";
 import { supabase } from "@/lib/supabase";
-import { Tables } from "@/model/supabase-types";
+import { Tables } from "@/model/supabase.types";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import React, { useMemo, useState } from "react";

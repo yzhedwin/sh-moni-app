@@ -23,10 +23,10 @@ function RootNavigator() {
 
   return (
     <Stack>
-      <Stack.Protected guard={isLoggedIn}>
+      <Stack.Protected guard={!isLoggedIn}>
         <Stack.Screen name="(protected)" options={{ headerShown: false }} />
       </Stack.Protected>
-      <Stack.Protected guard={!isLoggedIn}>
+      <Stack.Protected guard={isLoggedIn}>
         <Stack.Screen name="login" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
@@ -42,6 +42,7 @@ export default function RootLayout() {
         <RootNavigator />
         <StatusBar style="auto" />
       </AuthProvider>
+
       <Toast
         config={{
           success: (props) => (

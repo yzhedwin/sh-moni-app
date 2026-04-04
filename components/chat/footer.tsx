@@ -1,4 +1,4 @@
-import { Tables } from "@/model/supabase-types";
+import { Tables } from "@/model/supabase.types";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import { Text, TextInput } from "react-native-gesture-handler";
 interface Props {

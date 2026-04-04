@@ -16,7 +16,7 @@
         ]
       },
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.shmoniapp"
+      "bundleIdentifier": "com.prosh2.shmoniapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +30,7 @@
       "package": "com.anonymous.shmoniapp"
     },
     "web": {
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -47,7 +47,14 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "prosh2",
+          "enableGooglePay": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

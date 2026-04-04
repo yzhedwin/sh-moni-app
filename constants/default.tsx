@@ -1,4 +1,4 @@
-import { Tables } from "@/model/supabase-types";
+import { Tables } from "@/model/supabase.types";
 import { randomUUID } from "expo-crypto";
 
 export const DEFAULT_CATEGORIES = [

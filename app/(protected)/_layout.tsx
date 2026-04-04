@@ -12,8 +12,11 @@ export default function ProtectedLayout() {
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="upload/index" options={{ headerShown: false }} />
-      <Stack.Screen name="analytics/index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="subscription/index"
+        options={{ headerShown: false, presentation: "modal" }}
+      />
+      {/* <Stack.Screen name="subscription/stripe-checkout" options={{ headerShown: false, presentation: "modal" }} /> */}
     </Stack>
   );
 }

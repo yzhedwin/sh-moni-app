@@ -77,7 +77,10 @@ export default function HomeScreen() {
   }, []);
 
   const getExpenditure = (month: number) => {
-    return DUMMY_TOTAL_EXPENDITURES.find((item) => item.month === month);
+    const expenditure = DUMMY_TOTAL_EXPENDITURES.find(
+      (item) => item.month === month,
+    );
+    return expenditure !== undefined ? expenditure.amount : 0;
   };
   const getPast6Months = () => {
     const months: ExpenditureMonth[] = [];
@@ -114,7 +117,7 @@ export default function HomeScreen() {
           <View style={styles.balanceContainer}>
             <Text style={styles.balanceLabel}>Total Monthly Spending</Text>
             <Text style={styles.balance}>
-              ${getExpenditure(expenditureMonth?.month)?.amount}
+              ${getExpenditure(expenditureMonth?.month)}
             </Text>
           </View>
           <View style={styles.period}>

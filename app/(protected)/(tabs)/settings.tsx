@@ -1,5 +1,6 @@
 import { onSignOutButtonPress } from "@/components/social-auth-buttons/sign-out-button";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 function SettingRow({ icon, label, onPress }: any) {
@@ -20,6 +21,11 @@ export default function SettingsScreen() {
         <SettingRow icon="notifications" label="Notifications" />
         <SettingRow icon="card" label="Payment Methods" />
         <SettingRow icon="cloud-upload" label="Data Backup" />
+        <SettingRow
+          icon="cloud-upload"
+          label="Get Premium"
+          onPress={() => router.navigate("/subscription")}
+        />
         <SettingRow
           icon="log-out"
           label="Logout"

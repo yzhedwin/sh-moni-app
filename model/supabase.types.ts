@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.4";
   };
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
   public: {
     Tables: {
       accounts: {
@@ -301,6 +276,8 @@ export type Database = {
           currency: string | null;
           full_name: string | null;
           id: string;
+          is_paid: boolean | null;
+          stripe_id: string | null;
           timezone: string | null;
           updated_at: string;
           username: string | null;
@@ -311,6 +288,8 @@ export type Database = {
           currency?: string | null;
           full_name?: string | null;
           id: string;
+          is_paid?: boolean | null;
+          stripe_id?: string | null;
           timezone?: string | null;
           updated_at?: string;
           username?: string | null;
@@ -321,6 +300,8 @@ export type Database = {
           currency?: string | null;
           full_name?: string | null;
           id?: string;
+          is_paid?: boolean | null;
+          stripe_id?: string | null;
           timezone?: string | null;
           updated_at?: string;
           username?: string | null;
@@ -464,12 +445,40 @@ export type Database = {
           },
         ];
       };
+      user_usages: {
+        Row: {
+          date: string;
+          id: string;
+          token_count: number | null;
+          updated_at: string;
+          usage_count: number | null;
+        };
+        Insert: {
+          date: string;
+          id?: string;
+          token_count?: number | null;
+          updated_at?: string;
+          usage_count?: number | null;
+        };
+        Update: {
+          date?: string;
+          id?: string;
+          token_count?: number | null;
+          updated_at?: string;
+          usage_count?: number | null;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      increment_token_count: {
+        Args: { token_used: number };
+        Returns: undefined;
+      };
+      increment_usage: { Args: { uid: string }; Returns: undefined };
     };
     Enums: {
       [_ in never]: never;
@@ -601,9 +610,6 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {},
   },
